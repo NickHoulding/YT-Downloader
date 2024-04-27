@@ -22,8 +22,8 @@ HEIGHT      = 400
 FONT_REG    = "Roboto"
 FONT_LGT    = "Roboto Light"
 FONT_BOLD   = "Roboto Bold"
-HEADING_SZ  = 32
-SUBHEAD_SZ  = 16
+HEAD_SZ     = 32
+SUBH_SZ     = 16
 BODY_SZ     = 10
 
 # COLORS ****************************************
@@ -42,7 +42,6 @@ class OptionMenuPlaceholder(tkinter.OptionMenu):
         super().__init__(master, self.var, *options)
 
 # INITIALIZATION ********************************
-# Initializes the GUI and all its components.
 def initGUI():
     # Root
     root = Tk()
@@ -87,9 +86,7 @@ def initGUI():
     # Run
     root.mainloop()
 
-
 # CUSTOMIZATION *********************************
-# These customize their respective GUI parts.
 def Root(root):
     root.title("YT Downloader")
     root.geometry(f"{WIDTH}x{HEIGHT}")
@@ -107,13 +104,13 @@ def headFrame(head_frame):
     head_frame.pack(side="top", fill="x")
 
 def Head(head):
-    head.configure(font=(FONT_BOLD, HEADING_SZ))
+    head.configure(font=(FONT_BOLD, HEAD_SZ))
     head.configure(fg=WHT, bg=GRY)
     head.configure(borderwidth=0, highlightthickness=0)
     head.pack(fill="x", side="top")
 
 def subHead(sub_head):
-    sub_head.configure(font=(FONT_LGT, SUBHEAD_SZ))
+    sub_head.configure(font=(FONT_LGT, SUBH_SZ))
     sub_head.configure(fg=WHT, bg=GRY)
     sub_head.configure(borderwidth=0, highlightthickness=0)
     sub_head.pack(fill="x", side="bottom")
@@ -124,7 +121,7 @@ def ctrlFrame(ctrl_frame):
     ctrl_frame.pack(fill="x", expand=True)
 
 def entryBox(entry):
-    entry.configure(font=(FONT_REG, SUBHEAD_SZ))
+    entry.configure(font=(FONT_REG, SUBH_SZ))
     entry.configure(fg=WHT, bg=LGT_GRY, insertbackground=OFF_WHT)
     entry.configure(borderwidth=0, highlightthickness=0)
     entry.pack(fill="x", expand=True, padx=25, pady=20, anchor="center")

@@ -12,10 +12,10 @@ import sys
 import os
 
 # GLOBALS ***************************************
-T_LOCK      = threading.Lock()
-FILE_FRMT   = "AUD+VID"
+LOCK        = threading.Lock()
+FILE_FMT    = "AUD+VID"
 FILE_RES    = "1080p"
-FILE_TYPE   = "mp4"
+FILE_TYP    = "mp4"
 LINKS       = []
 
 # IMPLEMENTATION ********************************
