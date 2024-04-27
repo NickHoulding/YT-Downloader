@@ -1,10 +1,9 @@
-################## ABOUT ############################
-# Title:           Youtube Video Downloader
-# Creator:         Nicholas Ian Houlding
-# Version:         1.1
+# ABOUT *****************************************
+# Title:        Youtube Video Downloader
+# Developer:    Nicholas Ian Houlding
+# Version:      1.1
 
-
-################## IMPORTS ##########################
+# IMPORTS ***************************************
 from tkinter import OptionMenu
 from tkinter import Button
 from tkinter import Label
@@ -13,15 +12,13 @@ from tkinter import Text
 from tkinter import Tk
 import tkinter
 
-
-################## GLOBALS ##########################
+# GLOBALS ***************************************
 NAME        = "YT Downloader"
 VERS        = "v1.1"
-W_WID       = 800
-W_HGT       = 400
+WIDTH       = 800
+HEIGHT      = 400
 
-
-################## TEXT #############################
+# FONT ******************************************
 FONT_REG    = "Roboto"
 FONT_LGT    = "Roboto Light"
 FONT_BOLD   = "Roboto Bold"
@@ -29,16 +26,14 @@ HEADING_SZ  = 32
 SUBHEAD_SZ  = 16
 BODY_SZ     = 10
 
-
-################## COLORS ###########################
+# COLORS ****************************************
 OFF_WHT     = "#AAAAAA"
 LGT_GRY     = "#272727"
 GRY         = "#0F0F0F"
 WHT         = "#FFFFFF"
 RED         = "#FF0000"
 
-
-################## WIDGETS ##########################
+# CUSTOM WIDGETS ********************************
 class OptionMenuPlaceholder(tkinter.OptionMenu):
     from tkinter import StringVar as Tk
     def __init__(self, master, placeholder, *options):
@@ -46,9 +41,8 @@ class OptionMenuPlaceholder(tkinter.OptionMenu):
         self.var.set(placeholder)
         super().__init__(master, self.var, *options)
 
-
-################## INITIALIZATION ###################
-# This method initializes the GUI and its components.
+# INITIALIZATION ********************************
+# Initializes the GUI and all its components.
 def initGUI():
     # Root
     root = Tk()
@@ -94,11 +88,11 @@ def initGUI():
     root.mainloop()
 
 
-################## CUSTOMIZATION ####################
-# These methods customize respective GUI components.
+# CUSTOMIZATION *********************************
+# These customize their respective GUI parts.
 def Root(root):
     root.title("YT Downloader")
-    root.geometry(f"{W_WID}x{W_HGT}")
+    root.geometry(f"{WIDTH}x{HEIGHT}")
     root.resizable(False, False)
     root.configure(bg=GRY)
 
@@ -164,9 +158,9 @@ def downloadButton(dl_btn):
     dl_btn.configure(width=10, height=1, borderwidth=0, highlightthickness=0)
     dl_btn.pack(side="right", expand=True, anchor="center")
     
+    # Button actions
     dl_btn.bind("<Enter>", lambda e: dl_btn.configure(bg=OFF_WHT, fg=GRY))
     dl_btn.bind("<Leave>", lambda e: dl_btn.configure(bg=LGT_GRY, fg=WHT))
-    
     from main import startDL
     dl_btn.bind("<Button-1>", lambda e: startDL())
 
