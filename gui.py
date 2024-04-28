@@ -4,12 +4,17 @@
 # Version:      1.1
 
 # IMPORTS ***************************************
+from customtkinter import *
 from tkinter import OptionMenu
+from tkinter import PhotoImage
 from tkinter import Button
+from tkinter import Image
 from tkinter import Label
 from tkinter import Entry
 from tkinter import Text
 from tkinter import Tk
+from PIL import ImageTk
+from PIL import Image
 import tkinter
 
 # GLOBALS ***************************************
@@ -22,29 +27,23 @@ HEIGHT      = 400
 FONT_REG    = "Roboto"
 FONT_LGT    = "Roboto Light"
 FONT_BOLD   = "Roboto Bold"
-HEAD_SZ     = 32
-SUBH_SZ     = 16
-BODY_SZ     = 10
+TITLE_SZ    = 32
+HEAD_SZ     = 18
+SUBH_SZ     = 14
+BODY_SZ     = 12
+SMALL_SZ    = 10
 
 # COLORS ****************************************
-OFF_WHT     = "#AAAAAA"
+OFF_WHT     = "#D9D9D9"
 LGT_GRY     = "#272727"
 GRY         = "#0F0F0F"
 WHT         = "#FFFFFF"
 RED         = "#FF0000"
 
-# CUSTOM WIDGETS ********************************
-class OptionMenuPlaceholder(tkinter.OptionMenu):
-    from tkinter import StringVar as Tk
-    def __init__(self, master, placeholder, *options):
-        self.var = tkinter.StringVar(master)
-        self.var.set(placeholder)
-        super().__init__(master, self.var, *options)
-
 # INITIALIZATION ********************************
 def initGUI():
     # Root
-    root = Tk()
+    root = CTk()
     Root(root)
 
     # Frames
@@ -54,6 +53,10 @@ def initGUI():
     # Heading
     head_frame = tkinter.Frame(main_frame)
     headFrame(head_frame)
+    # Logo
+    logo_img = Image.open("YTDL_Logo.png")
+    logo = CTkImage(light_image=logo_img, dark_image=logo_img)
+    Logo(head_frame, logo)
     head = Label(head_frame, text=NAME)
     Head(head)
     sub_head = Label(head_frame, text=VERS)
@@ -62,17 +65,17 @@ def initGUI():
     # Controls
     ctrl_frame = tkinter.Frame(main_frame)
     ctrlFrame(ctrl_frame)
-    entry = Entry(ctrl_frame)
+    entry = CTkEntry(ctrl_frame)
     entryBox(entry)
     dd_frame = tkinter.Frame(ctrl_frame)
     dropdownFrame(dd_frame)
-    ftype_label = OptionMenuPlaceholder(dd_frame, "File Type", "mp4", "webm", "3pg")
+    ftype_label = CTkComboBox(master=dd_frame, values=["mp4", "webm", "3pg"])
     fileTypeDropdown(ftype_label)
-    fform_label = OptionMenuPlaceholder(dd_frame, "File Format", "Audio", "Video", "Both")
+    fform_label = CTkComboBox(master=dd_frame, values=["Both", "Audio", "Video"])
     fileFormatDropdown(fform_label)
-    res_label = OptionMenuPlaceholder(dd_frame, "Resolution", "1080p", "720p", "480p")
+    res_label = CTkComboBox(master=dd_frame, values=["1080p", "720p", "480p", "360p"])
     resolutionDropdown(res_label)
-    dl_btn = Button(dd_frame, text="Download")
+    dl_btn = CTkButton(dd_frame, text="Download")
     downloadButton(dl_btn)
 
     # Disclaimer
@@ -88,29 +91,34 @@ def initGUI():
 
 # CUSTOMIZATION *********************************
 def Root(root):
+    root.iconbitmap("YTDL_Icon.ico")
     root.title("YT Downloader")
     root.geometry(f"{WIDTH}x{HEIGHT}")
     root.resizable(False, False)
-    root.configure(bg=GRY)
 
 def mainFrame(main_frame):
     main_frame.configure(background=GRY)
-    main_frame.pack(fill="both", expand=True, padx=25, pady=25)
+    main_frame.pack(fill="both", expand=True, ipadx=25, ipady=25)
 
 def headFrame(head_frame):
     head_frame.configure(height=200)
-    head_frame.configure(background=RED)
+    head_frame.configure(background=GRY)
     head_frame.configure(borderwidth=0, highlightthickness=0)
     head_frame.pack(side="top", fill="x")
 
+def Logo(head_frame, logo):
+    logo.configure(size=(50, 50))
+    logo_label = CTkLabel(head_frame, image=logo, text=None, height=50)
+    logo_label.pack(side="top", fill="x", expand=True, anchor="center", pady=(35, 0))
+
 def Head(head):
-    head.configure(font=(FONT_BOLD, HEAD_SZ))
+    head.configure(font=(FONT_BOLD, TITLE_SZ))
     head.configure(fg=WHT, bg=GRY)
     head.configure(borderwidth=0, highlightthickness=0)
     head.pack(fill="x", side="top")
 
 def subHead(sub_head):
-    sub_head.configure(font=(FONT_LGT, SUBH_SZ))
+    sub_head.configure(font=(FONT_REG, SUBH_SZ))
     sub_head.configure(fg=WHT, bg=GRY)
     sub_head.configure(borderwidth=0, highlightthickness=0)
     sub_head.pack(fill="x", side="bottom")
@@ -121,62 +129,60 @@ def ctrlFrame(ctrl_frame):
     ctrl_frame.pack(fill="x", expand=True)
 
 def entryBox(entry):
-    entry.configure(font=(FONT_REG, SUBH_SZ))
-    entry.configure(fg=WHT, bg=LGT_GRY, insertbackground=OFF_WHT)
-    entry.configure(borderwidth=0, highlightthickness=0)
-    entry.pack(fill="x", expand=True, padx=25, pady=20, anchor="center")
+    entry.configure(font=(FONT_BOLD, TITLE_SZ))
+    entry.configure(fg_color=LGT_GRY, text_color=WHT, border_color=LGT_GRY)
+    entry.configure(corner_radius=7)
+    entry.pack(fill="x", expand=True, padx=40, pady=(20, 15), anchor="center")
 
 def dropdownFrame(dd_frame):
     dd_frame.configure(background=GRY)
     dd_frame.configure(borderwidth=0, highlightthickness=0)
-    dd_frame.pack(fill="both", expand=True, padx=25, pady=20, anchor="center")
+    dd_frame.pack(fill="both", expand=True, padx=40, pady=20, anchor="center")
 
 def fileTypeDropdown(ftype_label):
-    ftype_label.configure(font=(FONT_REG, BODY_SZ))
-    ftype_label.configure(fg=WHT, bg=LGT_GRY, activebackground=OFF_WHT, activeforeground=GRY)
-    ftype_label.configure(width=10, borderwidth=0, highlightthickness=0)
-    ftype_label.pack(side="left", expand=True, anchor="center")
+    ftype_label.configure(font=(FONT_BOLD, HEAD_SZ))
+    ftype_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
+    ftype_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
+    ftype_label.configure(border_width=2.5, justify="center")
+    ftype_label.pack(side="left", fill="x", expand=True, padx=(0, 25), anchor="center")
 
 def fileFormatDropdown(fform_label):
-    fform_label.configure(font=(FONT_REG, BODY_SZ))
-    fform_label.configure(fg=WHT, bg=LGT_GRY, activebackground=OFF_WHT, activeforeground=GRY)
-    fform_label.configure(width=10, borderwidth=0, highlightthickness=0)
-    fform_label.pack(side="left", expand=True, anchor="center")
+    fform_label.configure(font=(FONT_BOLD, HEAD_SZ))
+    fform_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
+    fform_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
+    fform_label.configure(border_width=2.5, justify="center")
+    fform_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
 
 def resolutionDropdown(res_label):
-    res_label.configure(font=(FONT_REG, BODY_SZ))
-    res_label.configure(fg=WHT, bg=LGT_GRY, activebackground=OFF_WHT, activeforeground=GRY)
-    res_label.configure(width=10, borderwidth=0, highlightthickness=0)
-    res_label.pack(side="left", expand=True, anchor="center")
+    res_label.configure(font=(FONT_BOLD, HEAD_SZ))
+    res_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
+    res_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
+    res_label.configure(border_width=2.5, justify="center")
+    res_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
 
 def downloadButton(dl_btn):
-    dl_btn.configure(font=(FONT_REG, BODY_SZ))
-    dl_btn.configure(fg=WHT, bg=LGT_GRY, activebackground=OFF_WHT, activeforeground=GRY)
-    dl_btn.configure(width=10, height=1, borderwidth=0, highlightthickness=0)
-    dl_btn.pack(side="right", expand=True, anchor="center")
-    
-    # Button actions
-    dl_btn.bind("<Enter>", lambda e: dl_btn.configure(bg=OFF_WHT, fg=GRY))
-    dl_btn.bind("<Leave>", lambda e: dl_btn.configure(bg=LGT_GRY, fg=WHT))
+    dl_btn.configure(font=(FONT_BOLD, HEAD_SZ))
+    dl_btn.configure(fg_color=WHT, hover_color=OFF_WHT, text_color=GRY)
     from main import startDL
-    dl_btn.bind("<Button-1>", lambda e: startDL())
+    dl_btn.configure(command=startDL)
+    dl_btn.pack(side="left", padx=(25, 0), expand=True, anchor="center")
 
 def discFrame(disc_frame):
     disc_frame.configure(height=200)
-    disc_frame.configure(background=RED)
+    disc_frame.configure(background=GRY)
     disc_frame.configure(borderwidth=0, highlightthickness=0)
     disc_frame.pack(side="bottom", fill="x")
 
 def discHead(disc_title):
-    disc_title.configure(font=(FONT_BOLD, BODY_SZ))
+    disc_title.configure(font=(FONT_REG, SMALL_SZ))
     disc_title.configure(fg=OFF_WHT, bg=GRY)
     disc_title.configure(justify="center")
     disc_title.configure(borderwidth=0, highlightthickness=0)
     disc_title.pack(side="top", fill="x")
 
 def discBody(disc_body):
-    disc_body.configure(font=(FONT_LGT, BODY_SZ))
+    disc_body.configure(font=(FONT_LGT, SMALL_SZ))
     disc_body.configure(fg=OFF_WHT, bg=GRY)
     disc_body.configure(justify="center")
     disc_body.configure(borderwidth=0, highlightthickness=0)
-    disc_body.pack(side="bottom", fill="x")
+    disc_body.pack(pady=(0, 35), side="bottom", fill="x")
