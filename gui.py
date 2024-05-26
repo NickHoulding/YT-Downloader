@@ -15,6 +15,7 @@ from tkinter import Text
 from tkinter import Tk
 from PIL import ImageTk
 from PIL import Image
+import threading
 import tkinter
 
 # GLOBALS ***************************************
@@ -22,6 +23,14 @@ NAME        = "YT Downloader"
 VERS        = "v1.1"
 WIDTH       = 800
 HEIGHT      = 400
+CONTROLS    = []
+ENTRY       = []
+DL_BTN      = []
+LOCK        = threading.Lock()
+LINK        = [None]
+FORMAT      = [None]
+RESOLUTION  = [None]
+FILETYPE    = [None]
 
 # FONT ******************************************
 FONT_REG    = "Roboto"
@@ -86,8 +95,59 @@ def initGUI():
     disc_body = Label(disc_frame, text="The developer of this software is not responsible for any acquisitions of copyrighted or personal material. Use at your own risk.")
     discBody(disc_body)
 
+    # Append Controls
+    LOCK.acquire()
+    CONTROLS.append(ftype_label)
+    CONTROLS.append(res_label)
+    CONTROLS.append(fform_label)
+    ENTRY.append(entry)
+    DL_BTN.append(dl_btn)
+    LOCK.release()
+
     # Run
     root.mainloop()
+
+# GUI SAFEGUARDING ******************************
+def disableUI():
+    LOCK.acquire()
+    for ctrl in CONTROLS:
+        ctrl.configure(state="disabled")
+
+    LINK[0] = ENTRY[0].get()
+    FORMAT[0] = CONTROLS[2].get()
+    RESOLUTION[0] = CONTROLS[1].get()
+    FILETYPE[0] = CONTROLS[0].get()
+    
+    ENTRY[0].delete(0, "end")
+    ENTRY[0].configure(state="disabled")
+
+    DL_BTN[0].configure(text="Downloading...")
+    DL_BTN[0].configure(state="disabled")
+    LOCK.release()
+
+def enableUI():
+    LOCK.acquire()
+    for ctrl in CONTROLS:
+        ctrl.configure(state="readonly")
+    
+    ENTRY[0].configure(state="normal")
+    
+    DL_BTN[0].configure(text="Download")
+    DL_BTN[0].configure(state="normal")
+    LOCK.release()
+
+# GETTER METHODS ********************************
+def getEntry():
+    return LINK[0]
+
+def getFileType():
+    return FILETYPE[0]
+
+def getResolution():
+    return RESOLUTION[0]
+
+def getFileFormat():
+    return FORMAT[0]
 
 # CUSTOMIZATION *********************************
 def Root(root):
@@ -143,7 +203,7 @@ def fileTypeDropdown(ftype_label):
     ftype_label.configure(font=(FONT_BOLD, HEAD_SZ))
     ftype_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
     ftype_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
-    ftype_label.configure(border_width=2.5, justify="center")
+    ftype_label.configure(border_width=3, justify="center")
     ftype_label.configure(state="readonly")
     ftype_label.pack(side="left", fill="x", expand=True, padx=(0, 25), anchor="center")
 
@@ -151,16 +211,15 @@ def resolutionDropdown(res_label):
     res_label.configure(font=(FONT_BOLD, HEAD_SZ))
     res_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
     res_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
-    res_label.configure(border_width=2.5, justify="center")
+    res_label.configure(border_width=3, justify="center")
     res_label.configure(state="readonly")
     res_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
-
 
 def fileFormatDropdown(fform_label, res_label):
     fform_label.configure(font=(FONT_BOLD, HEAD_SZ))
     fform_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
     fform_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
-    fform_label.configure(border_width=2.5, justify="center")
+    fform_label.configure(border_width=3, justify="center")
     fform_label.configure(state="readonly")
 
     state = res_label.get()
@@ -184,15 +243,13 @@ def fileFormatDropdown(fform_label, res_label):
     fform_label.configure(command=checkState)
     fform_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
 
-
 def downloadButton(dl_btn, entryBox):
     dl_btn.configure(font=(FONT_BOLD, HEAD_SZ))
     dl_btn.configure(fg_color=WHT, hover_color=OFF_WHT, text_color=GRY)
     from main import startDL
     dl_btn.configure(command=startDL)
+    dl_btn.configure(state="normal")
     dl_btn.pack(side="left", padx=(25, 0), expand=True, anchor="center")
-
-    dl_btn.bind("<Button-1>", lambda event: entryBox.delete(0, "end"))
 
 def discFrame(disc_frame):
     disc_frame.configure(height=200)
