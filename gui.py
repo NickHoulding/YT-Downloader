@@ -71,12 +71,12 @@ def initGUI():
     dropdownFrame(dd_frame)
     ftype_label = CTkComboBox(master=dd_frame, values=["mp4", "webm", "3pg"])
     fileTypeDropdown(ftype_label)
-    fform_label = CTkComboBox(master=dd_frame, values=["Both", "Audio", "Video"])
-    fileFormatDropdown(fform_label)
     res_label = CTkComboBox(master=dd_frame, values=["1080p", "720p", "480p", "360p"])
     resolutionDropdown(res_label)
+    fform_label = CTkComboBox(master=dd_frame, values=["Both", "Audio", "Video"])
+    fileFormatDropdown(fform_label, res_label)
     dl_btn = CTkButton(dd_frame, text="Download")
-    downloadButton(dl_btn)
+    downloadButton(dl_btn, entry)
 
     # Disclaimer
     disc_frame = tkinter.Frame(main_frame)
@@ -144,28 +144,55 @@ def fileTypeDropdown(ftype_label):
     ftype_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
     ftype_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
     ftype_label.configure(border_width=2.5, justify="center")
+    ftype_label.configure(state="readonly")
     ftype_label.pack(side="left", fill="x", expand=True, padx=(0, 25), anchor="center")
-
-def fileFormatDropdown(fform_label):
-    fform_label.configure(font=(FONT_BOLD, HEAD_SZ))
-    fform_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
-    fform_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
-    fform_label.configure(border_width=2.5, justify="center")
-    fform_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
 
 def resolutionDropdown(res_label):
     res_label.configure(font=(FONT_BOLD, HEAD_SZ))
     res_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
     res_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
     res_label.configure(border_width=2.5, justify="center")
+    res_label.configure(state="readonly")
     res_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
 
-def downloadButton(dl_btn):
+
+def fileFormatDropdown(fform_label, res_label):
+    fform_label.configure(font=(FONT_BOLD, HEAD_SZ))
+    fform_label.configure(dropdown_font=(FONT_BOLD, SUBH_SZ))
+    fform_label.configure(fg_color=GRY, border_color=LGT_GRY, dropdown_fg_color=GRY, button_color=LGT_GRY, button_hover_color=GRY, dropdown_hover_color=LGT_GRY, text_color=WHT)
+    fform_label.configure(border_width=2.5, justify="center")
+    fform_label.configure(state="readonly")
+
+    state = res_label.get()
+    def checkState(choice):
+        nonlocal state
+        
+        if fform_label.get() == "Audio":
+            if res_label.get() != "N/A":
+                state = res_label.get()
+            
+            res_label.set("N/A")
+            res_label.configure(state="disabled")
+        else:
+            res_label.configure(state="normal")
+            
+            if res_label.get() == "N/A":
+                res_label.set(state)
+            
+            res_label.configure(state="readonly")
+
+    fform_label.configure(command=checkState)
+    fform_label.pack(side="left", fill="x", expand=True, padx=25, anchor="center")
+
+
+def downloadButton(dl_btn, entryBox):
     dl_btn.configure(font=(FONT_BOLD, HEAD_SZ))
     dl_btn.configure(fg_color=WHT, hover_color=OFF_WHT, text_color=GRY)
     from main import startDL
     dl_btn.configure(command=startDL)
     dl_btn.pack(side="left", padx=(25, 0), expand=True, anchor="center")
+
+    dl_btn.bind("<Button-1>", lambda event: entryBox.delete(0, "end"))
 
 def discFrame(disc_frame):
     disc_frame.configure(height=200)
