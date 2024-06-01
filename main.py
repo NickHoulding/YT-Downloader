@@ -6,6 +6,8 @@
 # IMPORTS ***************************************
 from pytube import Playlist
 from pytube import YouTube
+from moviepy.editor import VideoFileClip
+from moviepy.editor import AudioFileClip
 from gui import getFileFormat
 from gui import getResolution
 from gui import getFileType
@@ -17,6 +19,7 @@ import datetime
 import threading
 import sys
 import os
+import re
 
 # GLOBALS ***************************************
 LOCK        = threading.Lock()
@@ -30,27 +33,22 @@ LINKS       = []
 def main():
     initGUI()
 
+
 def startDL():
     disableUI()
 
+    LOCK.acquire()
     lnk = getEntry()
-    typ = getFileType()
-    fmt = getFileFormat()
-
-    if fmt == "Audio":
-        res = None
-    else:
-        res = getResolution()
+    FILE_TYP[0] = getFileType()
+    FILE_FMT[0] = getFileFormat()
+    FILE_RES[0] = getResolution()
+    LOCK.release()
 
     valid = validateLink(lnk)
-    if valid:
-        LOCK.acquire()
-        FILE_RES[0] = res
-        FILE_TYP[0] = typ
-        FILE_FMT[0] = fmt
-        LOCK.release()
 
-        os.chdir(os.path.expanduser("~") + "/Downloads")
+    if valid:
+        # desktop
+        os.chdir(os.path.expanduser("~") + "/Desktop")
         dirName = "YTDL_" + str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         WORKING_DIR = os.path.join(os.getcwd(), dirName)
         os.mkdir(WORKING_DIR)
@@ -60,10 +58,10 @@ def startDL():
 
     enableUI()
 
+
 def validateLink(lnk):
     result = True
     
-    # Video
     if lnk.startswith("https://www.youtube.com/watch?v=") or lnk.startswith("https://youtu.be/"):
         try:
             yt = YouTube(lnk)
@@ -76,7 +74,6 @@ def validateLink(lnk):
         except:
             result = False
 
-    # Playlist
     elif lnk.startswith("https://www.youtube.com/playlist?list=") or lnk.startswith("https://youtube.com/playlist?list="):
         try:
             pl = Playlist(lnk)
@@ -89,50 +86,95 @@ def validateLink(lnk):
                 LOCK.release()
         except:
             result = False
-    
-    # Neither
     else:
         result = False
 
     return result
 
+
 def launchThreads():
-    while len(LINKS) > 0:
+    numLinks = len(LINKS)
+
+    while numLinks > 0:
         threads = []
-        numLinks = len(LINKS)
 
         if numLinks > MAX_THREADS:
             numLinks = MAX_THREADS
 
         LOCK.acquire()
-
         for i in range(numLinks):
             t = threading.Thread(target=download, args=(LINKS[i], FILE_FMT[0], FILE_RES[0], FILE_TYP[0]))
             threads.append(t)
             t.start()
-
+            numLinks -= 1
         LOCK.release()
 
         for t in threads:
             t.join()
 
-def download(link, fmt, res, typ):
+
+def download(lnk, fmt, res, typ):
     LOCK.acquire()
-    LINKS.remove(link)
-
-    yt = YouTube(link)
-
-    if fmt == "Audio":
-        stream = yt.streams.filter(only_audio=True).first()
-    elif fmt == "Video":
-        stream = yt.streams.filter(only_video=True).first()
-    else:
-        stream = yt.streams.filter(file_extension=typ).first()
-    
-    stream.download()
-
+    LINKS.remove(lnk)
     LOCK.release()
 
-# Start
+    yt = YouTube(lnk)
+
+    if fmt == "Audio":
+        audio_codec = set_audio_codec(typ)
+        audio_stream = yt.streams.filter(file_extension=typ, only_audio=True).first()
+        audio_path = audio_stream.download()
+        audio = AudioFileClip(audio_path)
+        filename = sanitize_filename(yt.title) + "." + typ
+        audio.write_audiofile(filename=filename, codec=audio_codec)
+        os.remove(audio_path)
+
+    elif fmt == "Video":
+        video_codec = set_video_codec(typ)
+        video_stream = yt.streams.filter(file_extension=typ, only_video=True).first()
+        video_path = video_stream.download()
+        video = VideoFileClip(video_path)
+        filename = sanitize_filename(yt.title) + "." + typ
+        video.write_videofile(filename=filename, codec=video_codec)
+        os.remove(video_path)
+
+    else:
+        video_codec = set_video_codec(typ)
+        audio_codec = set_audio_codec(typ)
+        video_stream = yt.streams.filter(file_extension=typ, only_video=True).first()
+        video_path = video_stream.download()
+        video = VideoFileClip(video_path)
+        audio_stream = yt.streams.filter(file_extension=typ, only_audio=True).first()
+        audio_path = audio_stream.download()
+        audio = AudioFileClip(audio_path)
+        final = video.set_audio(audio)
+        filename = sanitize_filename(yt.title) + "." + typ
+        final.write_videofile(filename=filename, codec=video_codec, audio_codec=audio_codec)
+        os.remove(video_path)
+        os.remove(audio_path)
+
+
+def set_audio_codec(typ):
+    if typ == "mp4":
+        return "aac"
+    elif typ == "webm":
+        return "opus"
+    elif typ == "3gp":
+        return "amr_nb"
+
+    
+def set_video_codec(typ):
+    if typ == "mp4":
+        return "libx264"
+    elif typ == "webm":
+        return "libvpx"
+    elif typ == "3gp":
+        return "libx264"
+
+
+def sanitize_filename(filename):
+    return re.sub(r'[^\w\s-]', '', filename).strip()
+
+
 if __name__ == "__main__":
     main()
