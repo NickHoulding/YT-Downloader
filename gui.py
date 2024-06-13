@@ -5,6 +5,7 @@
 
 # IMPORTS ***************************************
 from customtkinter import *
+
 from tkinter import OptionMenu
 from tkinter import PhotoImage
 from tkinter import Button
@@ -13,8 +14,10 @@ from tkinter import Label
 from tkinter import Entry
 from tkinter import Text
 from tkinter import Tk
+
 from PIL import ImageTk
 from PIL import Image
+
 import threading
 import tkinter
 
