@@ -25,7 +25,7 @@ import tkinter
 NAME        = "YT Downloader"
 VERS        = "v1.1"
 WIDTH       = 800
-HEIGHT      = 400
+HEIGHT      = 450
 CONTROLS    = []
 ENTRY       = []
 DL_BTN      = []
@@ -34,6 +34,7 @@ LINK        = [None]
 FORMAT      = [None]
 RESOLUTION  = [None]
 FILETYPE    = [None]
+MODE        = [True]
 
 # FONT ******************************************
 FONT_REG    = "Roboto"
@@ -89,6 +90,8 @@ def initGUI():
     fileFormatDropdown(fform_label, res_label)
     dl_btn = CTkButton(dd_frame, text="Download")
     downloadButton(dl_btn, entry)
+    thread_toggle = CTkSwitch(ctrl_frame, text="Multithreaded Mode", onvalue=True, offvalue=False)
+    MultiThreadedToggle(thread_toggle)
 
     # Disclaimer
     disc_frame = tkinter.Frame(main_frame)
@@ -151,6 +154,9 @@ def getResolution():
 
 def getFileFormat():
     return FORMAT[0]
+
+def getMode():
+    return MODE[0]
 
 # CUSTOMIZATION *********************************
 def Root(root):
@@ -254,6 +260,17 @@ def downloadButton(dl_btn, entryBox):
     dl_btn.configure(state="normal")
     dl_btn.pack(side="left", padx=(25, 0), expand=True, anchor="center")
 
+def MultiThreadedToggle(thread_toggle):
+    thread_toggle.configure(font=(FONT_BOLD, HEAD_SZ))
+    thread_toggle.configure(fg_color=LGT_GRY, bg_color=GRY, button_color=WHT, button_hover_color=OFF_WHT, progress_color=RED)
+
+    def toggle():
+        MODE[0] = not MODE[0]
+    
+    toggle()
+    thread_toggle.configure(command=toggle)
+    thread_toggle.pack(side="right", pady=(5,5), expand=True, anchor="center")
+
 def discFrame(disc_frame):
     disc_frame.configure(height=200)
     disc_frame.configure(background=GRY)
@@ -273,3 +290,8 @@ def discBody(disc_body):
     disc_body.configure(justify="center")
     disc_body.configure(borderwidth=0, highlightthickness=0)
     disc_body.pack(pady=(0, 35), side="bottom", fill="x")
+
+# START *****************************************
+if __name__ == "__main__":
+    from main import main
+    main()

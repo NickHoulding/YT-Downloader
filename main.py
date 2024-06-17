@@ -14,6 +14,7 @@ from gui import getFileFormat
 from gui import getResolution
 from gui import getFileType
 from gui import getEntry
+from gui import getMode
 from gui import disableUI
 from gui import enableUI
 from gui import initGUI
@@ -30,6 +31,7 @@ MAX_THREADS = 25
 FILE_FMT    = [None]
 FILE_RES    = [None]
 FILE_TYP    = [None]
+MT_MODE     = [None]
 LINKS       = []
 
 # IMPLEMENTATION ********************************
@@ -46,6 +48,7 @@ def startDL():
     FILE_TYP[0] = getFileType()
     FILE_FMT[0] = getFileFormat()
     FILE_RES[0] = getResolution()
+    MT_MODE[0] = getMode()
     LOCK.release()
 
     # Validate and download
@@ -56,7 +59,13 @@ def startDL():
         WORKING_DIR = os.path.join(os.getcwd(), dirName)
         os.mkdir(WORKING_DIR)
         os.chdir(WORKING_DIR)
-        launchThreads()
+
+        if MT_MODE[0] == True:
+            launchThreads()
+        else:
+            downloadAll()
+
+        os.chdir(os.path.expanduser("~") + "/Desktop")
 
     enableUI()
 
@@ -98,6 +107,14 @@ def validateLink(lnk):
     return result
 
 
+# Single Threaded Download
+def downloadAll():
+    print("single threaded download")
+    for lnk in LINKS:
+        download(lnk, FILE_FMT[0], FILE_RES[0], FILE_TYP[0])
+
+
+# Multi-Threaded Download
 def launchThreads():
     numLinks = len(LINKS)
 
@@ -113,6 +130,7 @@ def launchThreads():
         LOCK.acquire()
         for i in range(numLinks):
             t = threading.Thread(target=download, args=(LINKS[i], FILE_FMT[0], FILE_RES[0], FILE_TYP[0]))
+            print("Thread " + str(i) + " launched")
             threads.append(t)
             t.start()
             numLinks -= 1
